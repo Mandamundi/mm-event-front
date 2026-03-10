@@ -46,8 +46,8 @@ export default function Sidebar({
           <circle cx="20" cy="6"  r="2.5" fill="#c00000"/>
         </svg>
         <div className="flex flex-col leading-none">
-          <span className="text-[15px] font-bold tracking-[0.14em] text-[var(--white)] uppercase">Event Study</span>
-          <span className="text-[9px] font-light tracking-[0.2em] text-[var(--muted)] uppercase mt-[3px]">Market Analytics</span>
+          <span className="text-[15px] font-bold tracking-[0.14em] text-[var(--white)] uppercase">MM Event Study</span>
+          <span className="text-[9px] font-light tracking-[0.2em] text-[var(--muted)] uppercase mt-[3px]">Asset Tool</span>
         </div>
       </div>
 
@@ -83,7 +83,7 @@ export default function Sidebar({
       </div>
 
       <div className="p-3.5 px-4 pb-2.5 flex-1 overflow-y-auto">
-        <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Select Events</div>
+        <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Filter Events</div>
         <div className="flex justify-between mb-1.5 px-0.5">
           <span className="text-[10px] text-[var(--accent)] cursor-pointer tracking-[0.04em]" onClick={handleSelectAll}>Select all</span>
           <span className="text-[10px] text-[var(--accent)] cursor-pointer tracking-[0.04em]" onClick={handleDeselectAll}>Deselect all</span>
