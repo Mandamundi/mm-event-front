@@ -7,7 +7,7 @@ export function useAnalysis(params: any) {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!params.event_ids || params.event_ids.length === 0 || !params.ticker) {
+    if (!params || !params.event_ids || params.event_ids.length === 0 || !params.ticker) {
       setData(null);
       return;
     }
@@ -48,13 +48,13 @@ export function useAnalysis(params: any) {
       }
     };
   }, [
-    params.event_ids?.join(','),
-    params.ticker,
-    params.phase,
-    params.pre_days,
-    params.post_days,
-    params.benchmark_ticker,
-    params.second_ticker
+    params?.event_ids?.join(','),
+    params?.ticker,
+    params?.phase,
+    params?.pre_days,
+    params?.post_days,
+    params?.benchmark_ticker,
+    params?.second_ticker
   ]);
 
   return { data, isLoading, error };

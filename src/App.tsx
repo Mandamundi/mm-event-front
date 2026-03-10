@@ -52,17 +52,17 @@ export default function App() {
     }
   }, [theme]);
 
-  const analysisParams = {
-    event_ids: selectedEventIds,
-    ticker: primaryTicker,
-    phase,
-    pre_days: preDays,
-    post_days: postDays,
-    ...(showExcess && benchmarkTicker ? { benchmark_ticker: benchmarkTicker } : {}),
-    ...(secondaryTicker ? { second_ticker: secondaryTicker } : {})
-  };
+  const analysisParams = selectedEventIds.length > 0 ? {
+  event_ids: selectedEventIds,
+  ticker: primaryTicker,
+  phase,
+  pre_days: preDays,
+  post_days: postDays,
+  ...(showExcess && benchmarkTicker ? { benchmark_ticker: benchmarkTicker } : {}),
+  ...(secondaryTicker ? { second_ticker: secondaryTicker } : {})
+  } : null;
 
-  const { data: analysisData, isLoading: analysisLoading, error: analysisError } = useAnalysis(analysisParams);
+const { data: analysisData, isLoading: analysisLoading, error: analysisError } = useAnalysis(analysisParams);
 
   const selectedType = eventTypes.find((t: any) => t.id === selectedTypeId);
   const primaryAsset = assets.find((a: any) => a.ticker === primaryTicker);
