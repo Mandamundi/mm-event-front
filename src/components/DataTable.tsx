@@ -44,20 +44,21 @@ export default function DataTable({ data, hoveredEventId, setHoveredEventId, pin
   };
 
   // Find min/max for bolding
-  const getMinMax = (getter: (e: any) => number | null) => {
-    const vals = events.map(getter).filter((v: any) => v !== null && v !== undefined) as number[];
+  const getMinMax = (arr: any[], getter: (e: any) => number | null) => {
+    const vals = arr.map(getter).filter((v: any) => v !== null && v !== undefined) as number[];
     if (vals.length === 0) return { min: null, max: null };
     return { min: Math.min(...vals), max: Math.max(...vals) };
   };
 
-  const mm10 = getMinMax(e => getReturnAtT(e.window_data.returns, -10));
-  const mm5 = getMinMax(e => getReturnAtT(e.window_data.returns, -5));
-  const mp5 = getMinMax(e => getReturnAtT(e.window_data.returns, 5));
-  const mp10 = getMinMax(e => getReturnAtT(e.window_data.returns, 10));
-  const mp1m = getMinMax(e => e.window_data.stats.return_1m);
-  const mp3m = getMinMax(e => e.window_data.stats.return_3m);
-  const mp6m = getMinMax(e => e.window_data.stats.return_6m);
-  const mdd = getMinMax(e => e.window_data.stats.max_drawdown_in_window);
+  const validEvents = events.filter((e: any) => e.window_data !== null && e.window_data !== undefined);
+  const mm10 = getMinMax(validEvents, e => getReturnAtT(e.window_data.returns, -10));
+  const mm5  = getMinMax(validEvents, e => getReturnAtT(e.window_data.returns, -5));
+  const mp5  = getMinMax(validEvents, e => getReturnAtT(e.window_data.returns, 5));
+  const mp10 = getMinMax(validEvents, e => getReturnAtT(e.window_data.returns, 10));
+  const mp1m = getMinMax(validEvents, e => e.window_data.stats.return_1m);
+  const mp3m = getMinMax(validEvents, e => e.window_data.stats.return_3m);
+  const mp6m = getMinMax(validEvents, e => e.window_data.stats.return_6m);
+  const mdd  = getMinMax(validEvents, e => e.window_data.stats.max_drawdown_in_window);
 
   const renderDataCell = (val: number | null, isOutside: boolean, mm: { min: number | null, max: number | null }) => {
     if (isOutside || val === null || val === undefined) {
@@ -125,6 +126,17 @@ export default function DataTable({ data, hoveredEventId, setHoveredEventId, pin
               <td className="text-right py-[7px] px-2.5 text-[var(--muted)] whitespace-nowrap">—</td>
             </tr>
             {events.map((e: any) => {
+              if (!e.window_data) {
+                return (
+                  <tr key={e.event_id} className="border-b border-[rgba(31,51,71,0.6)] opacity-40">
+                    <td className="text-left pl-3.5 py-[7px] px-2.5">
+                      <div className="text-[11.5px] text-[var(--white)]">{e.event_label}</div>
+                      <div className="text-[10px] font-light text-[var(--muted)]">No data available</div>
+                    </td>
+                    {[...Array(9)].map((_, i) => <td key={i} className="text-right py-[7px] px-2.5 text-[var(--muted)]">—</td>)}
+                  </tr>
+                );
+              }
               const r10 = getReturnAtT(e.window_data.returns, -10);
               const r5 = getReturnAtT(e.window_data.returns, -5);
               const r5p = getReturnAtT(e.window_data.returns, 5);

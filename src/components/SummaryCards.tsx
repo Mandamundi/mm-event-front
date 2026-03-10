@@ -31,7 +31,10 @@ export default function SummaryCards({ data, selectedEventsCount, totalEventsCou
     medianVal = aggregate.median[aggregate.median.length - 1];
   }
 
-  const avgMaxDrawdown = events?.reduce((acc: number, e: any) => acc + (e.window_data.stats.max_drawdown_in_window || 0), 0) / (events?.length || 1);
+  const validEvents = events?.filter((e: any) => e.window_data !== null && e.window_data !== undefined) ?? [];
+  const avgMaxDrawdown = validEvents.length > 0
+    ? validEvents.reduce((acc: number, e: any) => acc + (e.window_data.stats.max_drawdown_in_window || 0), 0) / validEvents.length
+    : null;
 
   const formatHorizon = (h: string | null) => h ? `+${h.toUpperCase()}` : `+${meta?.post_days}d`;
 

@@ -28,6 +28,7 @@ export default function ChartPanel({
       point.band = [aggregate.p25[i], aggregate.p75[i]];
 
       events.forEach((e: any) => {
+        if (!e.window_data) return;
         const r = e.window_data.returns.find((ret: any) => ret.t === t);
         if (r) {
           point[e.event_id] = r.pct_return;
@@ -143,6 +144,7 @@ export default function ChartPanel({
             <Area type="monotone" dataKey="band" fill="var(--accent)" fillOpacity={0.12} stroke="none" isAnimationActive={false} />
 
             {events.map((e: any, i: number) => {
+              if (!e.window_data) return null;
               const isHovered = hoveredEventId === e.event_id;
               const isDimmed = hoveredEventId && !isHovered;
               
