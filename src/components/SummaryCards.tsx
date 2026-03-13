@@ -49,7 +49,13 @@ export default function SummaryCards({ data, selectedEventsCount, totalEventsCou
       </div>
       
       <div className="flex-1 bg-[var(--surface2)] py-2.5 px-4 flex flex-col gap-[2px]">
-        <div className="text-[9px] font-bold tracking-[0.15em] uppercase text-[var(--muted)]">Win Rate {formatHorizon(maxHorizon)}</div>
+        <div className="text-[9px] font-bold tracking-[0.15em] uppercase text-[var(--muted)] flex items-center gap-1">
+          Win Rate {formatHorizon(maxHorizon)}
+          <span
+            title="Win rate = % of events where the asset finished positive at this horizon. 80% means 4 of 5 events had a positive return."
+            className="cursor-help text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
+          >ⓘ</span>
+        </div>
         <div className="text-[22px] font-bold leading-none tracking-[-0.01em] text-[var(--accent)]">
           {winRate ? `${winRate.rate.toFixed(0)}%` : '—'}
         </div>

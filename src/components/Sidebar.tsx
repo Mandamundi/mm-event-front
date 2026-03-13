@@ -41,9 +41,9 @@ export default function Sidebar({
           <line x1="8"  y1="20" x2="8"  y2="8"  stroke="#70c5e4" strokeWidth="1.5"/>
           <line x1="14" y1="20" x2="14" y2="12" stroke="#70c5e4" strokeWidth="1.5"/>
           <line x1="20" y1="20" x2="20" y2="6"  stroke="#70c5e4" strokeWidth="1.5"/>
-          <circle cx="8"  cy="8"  r="2.5" fill="#70c5e4"/>
-          <circle cx="14" cy="12" r="2"   fill="#70c5e4" opacity="0.7"/>
-          <circle cx="20" cy="6"  r="2.5" fill="#c00000"/>
+          <circle cx="8"  cy="8"  r="2.5" fill="#dff3ef"/>
+          <circle cx="14" cy="12" r="2"   fill="#6eddd0" opacity="0.7"/>
+          <circle cx="20" cy="6"  r="2.5" fill="#7de0c3"/>
         </svg>
         <div className="flex flex-col leading-none">
           <span className="text-[15px] font-bold tracking-[0.14em] text-[var(--white)] uppercase">MM Event Study</span>

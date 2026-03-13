@@ -117,7 +117,13 @@ export default function RightPanel({
       <div className="p-3.5 px-4 border-b border-[var(--navy-border)]">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Benchmark</div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[11.5px] font-normal text-[var(--white-dim)]">Excess return (alpha)</span>
+          <span className="text-[11.5px] font-normal text-[var(--white-dim)] flex items-center gap-1">
+            Excess return (alpha)
+            <span
+              title="Excess return shows performance relative to a benchmark. A value of +3% means the asset outperformed the benchmark by 3 percentage points over that period."
+              className="cursor-help text-[var(--muted)] hover:text-[var(--accent)] transition-colors text-[10px]"
+            >ⓘ</span>
+          </span>
           <div 
             className={`w-8 h-[17px] rounded-[10px] relative cursor-pointer shrink-0 transition-colors duration-150 ${showExcess ? 'bg-[var(--accent)]' : 'bg-[var(--navy-border)]'}`}
             onClick={() => setShowExcess(!showExcess)}

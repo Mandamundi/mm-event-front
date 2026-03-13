@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import RightPanel from './components/RightPanel';
 import SummaryCards from './components/SummaryCards';
@@ -51,6 +51,30 @@ export default function App() {
       document.body.classList.remove('light');
     }
   }, [theme]);
+
+  const [chartHeightPct, setChartHeightPct] = useState(55); // % of content area
+  const isDragging = useRef(false);
+  const contentAreaRef = useRef<HTMLDivElement>(null);
+
+  const handleDragStart = useCallback(() => { isDragging.current = true; }, []);
+
+  const handleDrag = useCallback((e: MouseEvent) => {
+    if (!isDragging.current || !contentAreaRef.current) return;
+    const rect = contentAreaRef.current.getBoundingClientRect();
+    const pct = ((e.clientY - rect.top) / rect.height) * 100;
+    setChartHeightPct(Math.min(80, Math.max(20, pct)));
+  }, []);
+
+  const handleDragEnd = useCallback(() => { isDragging.current = false; }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleDrag);
+    window.addEventListener('mouseup', handleDragEnd);
+    return () => {
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('mouseup', handleDragEnd);
+    };
+  }, [handleDrag, handleDragEnd]);
 
   const analysisParams = selectedEventIds.length > 0 ? {
   event_ids: selectedEventIds,
@@ -117,35 +141,32 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
           eventTypeLabel={selectedType?.label}
         />
 
-        <div className="flex-1 overflow-y-auto p-4 px-5 flex flex-col gap-4">
-          {analysisError && (
-            <div className="bg-[rgba(192,0,0,0.1)] border border-[var(--neg)] text-[var(--neg)] p-3 rounded-[3px] text-[11px]">
-              {analysisError}
-            </div>
-          )}
-          
-          {analysisData?.skipped_events?.length > 0 && (
-            <div className="bg-[rgba(222,163,89,0.1)] border border-[var(--gold)] text-[var(--gold)] p-2 rounded-[3px] text-[11px] flex justify-between items-center">
-              <span>{analysisData.skipped_events.length} event(s) excluded — end date not available</span>
-            </div>
-          )}
-
-          {analysisLoading && !analysisData && (
-            <div className="h-[260px] bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] animate-pulse flex items-center justify-center text-[var(--muted)]">
-              Loading analysis...
-            </div>
-          )}
-
-          {!analysisLoading && selectedEventIds.length === 0 && (
-            <div className="h-[260px] bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] flex items-center justify-center text-[var(--muted)]">
-              No events selected
-            </div>
-          )}
-
-          {primaryData && selectedEventIds.length > 0 && (
-            <>
-              <ChartPanel 
-                data={primaryData} 
+        <div className="flex-1 overflow-hidden flex flex-col" ref={contentAreaRef}>
+          {/* Scrollable top: errors + loading + chart */}
+          <div className="overflow-y-auto px-5 pt-4 flex flex-col gap-3 shrink-0" style={{ height: `${chartHeightPct}%` }}>
+            {analysisError && (
+              <div className="bg-[rgba(192,0,0,0.1)] border border-[var(--neg)] text-[var(--neg)] p-3 rounded-[3px] text-[11px] shrink-0">
+                {analysisError}
+              </div>
+            )}
+            {analysisData?.skipped_events?.length > 0 && (
+              <div className="bg-[rgba(222,163,89,0.1)] border border-[var(--gold)] text-[var(--gold)] p-2 rounded-[3px] text-[11px] flex justify-between items-center shrink-0">
+                <span>{analysisData.skipped_events.length} event(s) excluded — end date not available</span>
+              </div>
+            )}
+            {analysisLoading && !analysisData && (
+              <div className="h-[260px] bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] animate-pulse flex items-center justify-center text-[var(--muted)] shrink-0">
+                Loading analysis...
+              </div>
+            )}
+            {!analysisLoading && selectedEventIds.length === 0 && (
+              <div className="h-[260px] bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] flex items-center justify-center text-[var(--muted)] shrink-0">
+                No events selected
+              </div>
+            )}
+            {primaryData && selectedEventIds.length > 0 && (
+              <ChartPanel
+                data={primaryData}
                 title={`${primaryAsset?.label || primaryTicker} / Price Return`}
                 showExcess={showExcess}
                 setShowExcess={setShowExcess}
@@ -155,20 +176,10 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
                 setPinnedEventId={setPinnedEventId}
                 theme={theme}
               />
-              <DataTable 
-                data={primaryData}
-                hoveredEventId={hoveredEventId}
-                setHoveredEventId={setHoveredEventId}
-                pinnedEventId={pinnedEventId}
-                setPinnedEventId={setPinnedEventId}
-              />
-            </>
-          )}
-
-          {secondaryData && secondaryTicker && selectedEventIds.length > 0 && (
-            <>
-              <ChartPanel 
-                data={secondaryData} 
+            )}
+            {secondaryData && secondaryTicker && selectedEventIds.length > 0 && (
+              <ChartPanel
+                data={secondaryData}
                 title={`${secondaryAsset?.label || secondaryTicker} / Price Return`}
                 hoveredEventId={hoveredEventId}
                 setHoveredEventId={setHoveredEventId}
@@ -176,15 +187,39 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
                 setPinnedEventId={setPinnedEventId}
                 theme={theme}
               />
-              <DataTable 
+            )}
+          </div>
+
+          {/* Drag handle */}
+          <div
+            className="h-[5px] shrink-0 cursor-row-resize flex items-center justify-center group"
+            style={{ background: 'var(--navy-border)' }}
+            onMouseDown={handleDragStart}
+          >
+            <div className="w-8 h-[3px] rounded-full bg-[var(--muted)] group-hover:bg-[var(--accent)] transition-colors duration-150" />
+          </div>
+
+          {/* Scrollable bottom: tables */}
+          <div className="overflow-y-auto px-5 pb-4 pt-3 flex flex-col gap-3 flex-1">
+            {primaryData && selectedEventIds.length > 0 && (
+              <DataTable
+                data={primaryData}
+                hoveredEventId={hoveredEventId}
+                setHoveredEventId={setHoveredEventId}
+                pinnedEventId={pinnedEventId}
+                setPinnedEventId={setPinnedEventId}
+              />
+            )}
+            {secondaryData && secondaryTicker && selectedEventIds.length > 0 && (
+              <DataTable
                 data={secondaryData}
                 hoveredEventId={hoveredEventId}
                 setHoveredEventId={setHoveredEventId}
                 pinnedEventId={pinnedEventId}
                 setPinnedEventId={setPinnedEventId}
               />
-            </>
-          )}
+            )}
+          </div>
         </div>
       </main>
 

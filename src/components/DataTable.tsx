@@ -73,12 +73,12 @@ export default function DataTable({ data, hoveredEventId, setHoveredEventId, pin
   };
 
   return (
-    <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] overflow-hidden">
+    <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] overflow-hidden flex flex-col" style={{ maxHeight: 'var(--table-max-height, 340px)' }}>
       <div className="flex items-center justify-between p-2.5 px-3.5 border-b border-[var(--navy-border)]">
         <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-[var(--muted)]">Performance by Event</span>
         <span className="text-[10px] text-[var(--muted)]">All values in trading days</span>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto flex-1">
         <table className="w-full border-collapse text-[11.5px]">
           <thead>
             <tr>
@@ -109,21 +109,6 @@ export default function DataTable({ data, hoveredEventId, setHoveredEventId, pin
               <td className="text-right py-[7px] px-2.5 whitespace-nowrap">—</td>
               <td className="text-right py-[7px] px-2.5 whitespace-nowrap">—</td>
               <td className="text-right py-[7px] px-2.5 whitespace-nowrap">—</td>
-            </tr>
-            <tr className="bg-[rgba(222,163,89,0.07)] font-bold border-b border-[rgba(31,51,71,0.6)]">
-              <td className="text-left pl-3.5 py-[7px] px-2.5 whitespace-nowrap">
-                <div className="text-[11.5px] text-[var(--accent)]">🎯 Win Rate</div>
-                <div className="text-[10px] font-light text-[var(--muted)] mt-[1px]">% positive</div>
-              </td>
-              <td className="text-right py-[7px] px-2.5 text-[var(--muted)] whitespace-nowrap">—</td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap"><span className="text-[var(--muted)]">—</span></td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap"><span className="text-[var(--muted)]">—</span></td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap"><span className="text-[var(--muted)]">—</span></td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap"><span className="text-[var(--muted)]">—</span></td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap">{renderWinRate('1m')}</td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap">{renderWinRate('3m')}</td>
-              <td className="text-right py-[7px] px-2.5 whitespace-nowrap">{renderWinRate('6m')}</td>
-              <td className="text-right py-[7px] px-2.5 text-[var(--muted)] whitespace-nowrap">—</td>
             </tr>
             {events.map((e: any) => {
               if (!e.window_data) {
