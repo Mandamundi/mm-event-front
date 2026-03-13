@@ -95,7 +95,7 @@ export default function ChartPanel({
   };
 
   return (
-    <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] pt-3.5 px-4 pb-2.5">
+    <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] pt-3.5 px-4 pb-2.5 flex flex-col h-full">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-bold tracking-[0.1em] uppercase text-[var(--white-dim)]">{title}</span>
         {setShowExcess && (
@@ -116,7 +116,7 @@ export default function ChartPanel({
         )}
       </div>
 
-      <div className="relative h-[260px] w-full">
+      <div className="relative w-full" style={{ height: 'calc(100% - 80px)', minHeight: '200px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
             <CartesianGrid stroke="var(--navy-border)" vertical={false} />

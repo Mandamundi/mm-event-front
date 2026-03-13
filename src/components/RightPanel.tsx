@@ -22,7 +22,11 @@ export default function RightPanel({
   selectedEventIds,
   eventTypes,
   selectedTypeId,
-  onUploadSuccess
+  onUploadSuccess,
+  hoveredEventId,
+  setHoveredEventId,
+  pinnedEventId,
+  setPinnedEventId,
 }: any) {
   const [isCSVModalOpen, setIsCSVModalOpen] = useState(false);
   const [localPreDays, setLocalPreDays] = useState(preDays);
@@ -199,12 +203,41 @@ export default function RightPanel({
       <div className="p-3.5 px-4 flex-1">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Event Colors</div>
         <div className="flex flex-col gap-1 mt-1">
-          {selectedEvents.map((e: any, i: number) => (
-            <div key={e.id} className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full shrink-0" style={{ background: `var(--c${(i % 9) + 1})` }}></div>
-              <span className="text-[11px] text-[var(--white-dim)] truncate">{e.label}</span>
-            </div>
-          ))}
+          {selectedEvents.map((e: any, i: number) => {
+            const isHovered = hoveredEventId === e.id;
+            return (
+              <div
+                key={e.id}
+                className="flex items-center gap-2 cursor-pointer rounded-[2px] px-1 py-[2px] transition-colors duration-100"
+                style={{ background: isHovered ? 'var(--accent-dim)' : 'transparent' }}
+                onMouseEnter={() => !pinnedEventId && setHoveredEventId(e.id)}
+                onMouseLeave={() => !pinnedEventId && setHoveredEventId(null)}
+                onClick={() => {
+                  if (pinnedEventId === e.id) {
+                    setPinnedEventId(null);
+                    setHoveredEventId(null);
+                  } else {
+                    setPinnedEventId(e.id);
+                    setHoveredEventId(e.id);
+                  }
+                }}
+              >
+                <div
+                  className="w-3 h-3 rounded-full shrink-0 transition-transform duration-100"
+                  style={{
+                    background: `var(--c${(i % 9) + 1})`,
+                    transform: isHovered ? 'scale(1.3)' : 'scale(1)'
+                  }}
+                />
+                <span
+                  className="text-[11px] truncate transition-colors duration-100"
+                  style={{ color: isHovered ? 'var(--white)' : 'var(--white-dim)' }}
+                >
+                  {e.label}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 

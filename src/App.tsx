@@ -143,7 +143,7 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
 
         <div className="flex-1 overflow-hidden flex flex-col" ref={contentAreaRef}>
           {/* Scrollable top: errors + loading + chart */}
-          <div className="overflow-y-auto px-5 pt-4 flex flex-col gap-3 shrink-0" style={{ height: `${chartHeightPct}%` }}>
+          <div className="overflow-hidden px-5 pt-4 flex flex-col gap-3 shrink-0" style={{ height: `${chartHeightPct}%` }}>
             {analysisError && (
               <div className="bg-[rgba(192,0,0,0.1)] border border-[var(--neg)] text-[var(--neg)] p-3 rounded-[3px] text-[11px] shrink-0">
                 {analysisError}
@@ -244,6 +244,10 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
         eventTypes={eventTypes}
         selectedTypeId={selectedTypeId}
         onUploadSuccess={handleUploadSuccess}
+        hoveredEventId={hoveredEventId}
+        setHoveredEventId={setHoveredEventId}
+        pinnedEventId={pinnedEventId}
+        setPinnedEventId={setPinnedEventId}
       />
     </div>
   );
