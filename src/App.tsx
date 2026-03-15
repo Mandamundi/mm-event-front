@@ -186,6 +186,8 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
                 pinnedEventId={pinnedEventId}
                 setPinnedEventId={setPinnedEventId}
                 theme={theme}
+                assetLabel={primaryAsset?.label || primaryTicker}
+                eventTypeLabel={selectedType?.label || ''}
               />
             )}
           </div>

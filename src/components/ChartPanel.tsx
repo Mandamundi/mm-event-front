@@ -116,7 +116,7 @@ export default function ChartPanel({
               </button>
             </div>
           )}
-          <ChartExport data={data} title={title} subtitle="Event Study | Market Analytics" />
+          <ChartExport data={data} assetLabel={assetLabel} eventTypeLabel={eventTypeLabel} />
         </div>
       </div>
 
