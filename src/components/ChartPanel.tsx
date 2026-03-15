@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip, ResponsiveContainer } from 'recharts';
 import { assignColor } from '../utils/formatters';
+import ChartExport from './ChartExport';
 
 export default function ChartPanel({ 
   data, 
@@ -98,22 +99,25 @@ export default function ChartPanel({
     <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] pt-3.5 px-4 pb-2.5 flex flex-col h-full">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-bold tracking-[0.1em] uppercase text-[var(--white-dim)]">{title}</span>
-        {setShowExcess && (
-          <div className="flex gap-0 border border-[var(--navy-border)] rounded-[3px] overflow-hidden">
-            <button 
-              className={`py-1 px-2.5 text-[10px] font-sans border-none cursor-pointer tracking-[0.04em] ${!showExcess ? 'bg-[var(--navy-light)] text-[var(--white)]' : 'bg-transparent text-[var(--muted)]'}`}
-              onClick={() => setShowExcess(false)}
-            >
-              Raw Return
-            </button>
-            <button 
-              className={`py-1 px-2.5 text-[10px] font-sans border-none cursor-pointer tracking-[0.04em] ${showExcess ? 'bg-[var(--navy-light)] text-[var(--white)]' : 'bg-transparent text-[var(--muted)]'}`}
-              onClick={() => setShowExcess(true)}
-            >
-              Excess Return
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {setShowExcess && (
+            <div className="flex gap-0 border border-[var(--navy-border)] rounded-[3px] overflow-hidden">
+              <button 
+                className={`py-1 px-2.5 text-[10px] font-sans border-none cursor-pointer tracking-[0.04em] ${!showExcess ? 'bg-[var(--navy-light)] text-[var(--white)]' : 'bg-transparent text-[var(--muted)]'}`}
+                onClick={() => setShowExcess(false)}
+              >
+                Raw Return
+              </button>
+              <button 
+                className={`py-1 px-2.5 text-[10px] font-sans border-none cursor-pointer tracking-[0.04em] ${showExcess ? 'bg-[var(--navy-light)] text-[var(--white)]' : 'bg-transparent text-[var(--muted)]'}`}
+                onClick={() => setShowExcess(true)}
+              >
+                Excess Return
+              </button>
+            </div>
+          )}
+          <ChartExport data={data} title={title} subtitle="Event Study | Market Analytics" />
+        </div>
       </div>
 
       <div className="relative w-full" style={{ height: 'calc(100% - 80px)', minHeight: '200px' }}>
