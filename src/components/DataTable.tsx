@@ -73,12 +73,12 @@ export default function DataTable({ data, hoveredEventId, setHoveredEventId, pin
   };
 
   return (
-    <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] overflow-hidden flex flex-col" style={{ maxHeight: 'var(--table-max-height, 340px)' }}>
+    <div className="bg-[var(--surface2)] border border-[var(--navy-border)] rounded-[3px] overflow-hidden flex flex-col flex-1 min-h-0">
       <div className="flex items-center justify-between p-2.5 px-3.5 border-b border-[var(--navy-border)]">
         <span className="text-[10px] font-bold tracking-[0.12em] uppercase text-[var(--muted)]">Performance by Event</span>
         <span className="text-[10px] text-[var(--muted)]">All values in trading days</span>
       </div>
-      <div className="overflow-x-auto overflow-y-auto flex-1">
+      <div className="overflow-x-auto overflow-y-auto flex-1 min-h-0">
         <table className="w-full border-collapse text-[11.5px]">
           <thead>
             <tr>

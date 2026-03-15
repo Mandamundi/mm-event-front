@@ -200,7 +200,7 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
           </div>
 
           {/* Scrollable bottom: tables */}
-          <div className="overflow-y-auto px-5 pb-4 pt-3 flex flex-col gap-3 flex-1">
+          <div className="overflow-hidden px-5 pb-4 pt-3 flex flex-col gap-3 flex-1 min-h-0">
             {primaryData && selectedEventIds.length > 0 && (
               <DataTable
                 data={primaryData}
