@@ -67,13 +67,13 @@ export default function Sidebar({
         {selectedType?.has_phases && (
           <div className="flex gap-0 mt-2 border border-[var(--navy-border)] rounded-[3px] overflow-hidden">
             <button 
-              className={`flex-1 py-1.5 px-2 font-sans text-[11px] bg-transparent border-none cursor-pointer tracking-[0.04em] transition-all duration-150 ${phase === 'start' ? 'bg-[var(--accent)] text-[var(--navy)] font-bold' : 'text-[var(--muted)] font-normal'}`}
+              className={`flex-1 py-1.5 px-2 font-sans text-[11px] border-none cursor-pointer tracking-[0.04em] transition-all duration-150 ${phase === 'start' ? 'bg-[var(--accent)] text-[var(--navy)] font-bold' : 'bg-transparent text-[var(--muted)] font-normal'}`}
               onClick={() => setPhase('start')}
             >
               ▶ {selectedType.phase_labels?.start || 'Start'}
             </button>
             <button 
-              className={`flex-1 py-1.5 px-2 font-sans text-[11px] bg-transparent border-none cursor-pointer tracking-[0.04em] transition-all duration-150 ${phase === 'end' ? 'bg-[var(--accent)] text-[var(--navy)] font-bold' : 'text-[var(--muted)] font-normal'}`}
+              className={`flex-1 py-1.5 px-2 font-sans text-[11px] border-none cursor-pointer tracking-[0.04em] transition-all duration-150 ${phase === 'end' ? 'bg-[var(--accent)] text-[var(--navy)] font-bold' : 'bg-transparent text-[var(--muted)] font-normal'}`}
               onClick={() => setPhase('end')}
             >
               ◀ {selectedType.phase_labels?.end || 'End'}
