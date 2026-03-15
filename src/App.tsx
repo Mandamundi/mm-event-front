@@ -166,8 +166,10 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
             )}
             {primaryData && selectedEventIds.length > 0 && (
               <ChartPanel
-                data={primaryData}
+                data={primaryData} 
                 title={`${primaryAsset?.label || primaryTicker} / Price Return`}
+                assetLabel={primaryAsset?.label || primaryTicker}
+                eventTypeLabel={selectedType?.label || ''}
                 showExcess={showExcess}
                 setShowExcess={setShowExcess}
                 hoveredEventId={hoveredEventId}
@@ -179,15 +181,15 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
             )}
             {secondaryData && secondaryTicker && selectedEventIds.length > 0 && (
               <ChartPanel
-                data={secondaryData}
+                data={secondaryData} 
                 title={`${secondaryAsset?.label || secondaryTicker} / Price Return`}
+                assetLabel={secondaryAsset?.label || secondaryTicker || ''}
+                eventTypeLabel={selectedType?.label || ''}
                 hoveredEventId={hoveredEventId}
                 setHoveredEventId={setHoveredEventId}
                 pinnedEventId={pinnedEventId}
                 setPinnedEventId={setPinnedEventId}
                 theme={theme}
-                assetLabel={primaryAsset?.label || primaryTicker}
-                eventTypeLabel={selectedType?.label || ''}
               />
             )}
           </div>

@@ -5,7 +5,9 @@ import ChartExport from './ChartExport';
 
 export default function ChartPanel({ 
   data, 
-  title, 
+  title,
+  assetLabel,
+  eventTypeLabel,
   showExcess, 
   setShowExcess, 
   hoveredEventId, 
