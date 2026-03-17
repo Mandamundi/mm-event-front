@@ -185,7 +185,7 @@ async function drawChart(
   legendItems.push({ label: 'Median', color: '#111111', dash: false, alpha: 1 });
   legendItems.push({ label: 'Mean',   color: '#888888', dash: true,  alpha: 1 });
  
-  const availW = w - 32;
+  const availW = w - 20;
   const grid    = buildLegendGrid(legendItems, availW, ctx, legendFont);
   const legendH = grid.rows.length * legendRowH + 20;
 
