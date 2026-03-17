@@ -118,7 +118,12 @@ export default function ChartPanel({
               </button>
             </div>
           )}
-          <ChartExport data={data} assetLabel={assetLabel} eventTypeLabel={eventTypeLabel} />
+          <ChartExport
+            data={data}
+            assetLabel={assetLabel}
+            eventTypeLabel={eventTypeLabel}
+            watermarkUrl="/watermark.png"
+          />
         </div>
       </div>
 
