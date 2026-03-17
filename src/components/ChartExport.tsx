@@ -51,10 +51,32 @@ const SIZES = [
 const FONT = '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
 
 const EXPORT_PALETTE = [
+  // ── Original 20 (saturated, kept as-is) ──────────────────────────────────
   '#3BAFDA', '#E9573F', '#F6BB42', '#70CA63', '#926DDE',
   '#57C7D4', '#F44C87', '#BC94AC', '#184E74', '#D68C45',
   '#AA2906', '#17C3B2', '#6F2DBD', '#C1C286', '#026352',
   '#3B3F4F', '#F7AEF8', '#8093F1', '#94D2BD', '#EE9B00',
+  // ── Extension — 20 more, distinct hues, away from black/grey ─────────────
+  '#E040FB', // vivid purple-magenta
+  '#00BCD4', // cyan
+  '#FF7043', // deep orange
+  '#66BB6A', // medium green
+  '#EC407A', // pink-red
+  '#AB47BC', // medium purple
+  '#26A69A', // teal
+  '#FFA726', // amber
+  '#42A5F5', // blue
+  '#D4E157', // lime
+  '#EF5350', // red
+  '#29B6F6', // light blue
+  '#FF8F00', // dark amber
+  '#9CCC65', // light green
+  '#7E57C2', // medium violet
+  '#26C6DA', // cyan-teal
+  '#F06292', // light pink
+  '#AED581', // yellow-green
+  '#FF7FAB', // rose
+  '#4DD0E1', // aqua
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -97,8 +119,12 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 // ── Grid-aligned legend layout ────────────────────────────────────────────────
-// Mimics the MacroMicro style: fixed N-column grid, every cell equal width,
-// rows centered as a group.
+// Per-column widths: each column is exactly as wide as its widest label.
+// Tries the most columns that fit, down to 1.
+
+const SWATCH_W   = 24;
+const SWATCH_GAP = 7;
+const COL_PAD_R  = 28; // gap to the right of each column
 
 function buildLegendGrid(
   items: Array<{ label: string }>,
@@ -107,25 +133,42 @@ function buildLegendGrid(
   font: string,
 ) {
   ctx.font = font;
-  const maxLabelW = Math.max(...items.map(it => ctx.measureText(it.label).width));
-  const swatchW   = 24;
-  const swatchGap = 7;
-  const cellPadR  = 28;  // right-padding between cells
-  const cellW     = swatchW + swatchGap + maxLabelW + cellPadR;
+  const labelWidths = items.map(it => ctx.measureText(it.label).width);
 
-  // Pick column count: as many as fit without overflow
-  let cols = Math.max(1, Math.floor(availableWidth / cellW));
-  // Cap at 6 columns for readability
-  cols = Math.min(cols, 6);
-
-  const rows: Array<Array<{ label: string; index: number }>> = [];
-  for (let i = 0; i < items.length; i += cols) {
-    rows.push(
-      items.slice(i, i + cols).map((it, j) => ({ label: it.label, index: i + j }))
+  // Find the max cols where everything fits
+  let bestCols = 1;
+  for (let tryC = 6; tryC >= 1; tryC--) {
+    const colMaxW = Array.from({ length: tryC }, (_, c) =>
+      Math.max(0, ...items
+        .filter((_, i) => i % tryC === c)
+        .map((_, ri) => labelWidths[ri * tryC + c] ?? 0)
+      )
     );
+    const totalW = colMaxW.reduce((s, cw) => s + SWATCH_W + SWATCH_GAP + cw + COL_PAD_R, 0) - COL_PAD_R;
+    if (totalW <= availableWidth) { bestCols = tryC; break; }
   }
 
-  return { rows, cellW, swatchW, swatchGap, cols };
+  // Build rows
+  const rows: Array<Array<{ label: string; index: number }>> = [];
+  for (let i = 0; i < items.length; i += bestCols) {
+    rows.push(items.slice(i, i + bestCols).map((it, j) => ({ label: it.label, index: i + j })));
+  }
+
+  // Per-column widths based on actual items assigned to each column
+  const colWidths = Array.from({ length: bestCols }, (_, c) =>
+    Math.max(0, ...rows.flatMap(row => {
+      const cell = row[c];
+      return cell ? [labelWidths[cell.index]] : [];
+    }))
+  );
+
+  // Cumulative x-offsets per column
+  const colOffsets: number[] = [];
+  let off = 0;
+  colWidths.forEach(cw => { colOffsets.push(off); off += SWATCH_W + SWATCH_GAP + cw + COL_PAD_R; });
+  const totalRowW = off - COL_PAD_R;
+
+  return { rows, colWidths, colOffsets, totalRowW, swatchW: SWATCH_W, swatchGap: SWATCH_GAP };
 }
 
 // ── Main draw ─────────────────────────────────────────────────────────────────
@@ -172,8 +215,8 @@ async function drawChart(
   // ── Plot margins ─────────────────────────────────────────────────────────────
   // Extra left margin so y-axis label has room without crowding numbers
   const marginTop    = titleBlockH + 14;
-  const marginBottom = legendH + 50;   // 50px for x-label + tick labels + gap
-  const marginLeft   = 88;             // wider: room for rotated y-label + numbers
+  const marginBottom = legendH + 38;   // x-label + tick labels
+  const marginLeft   = 72;             // y-label (rotated) + numbers
   const marginRight  = 24;
 
   const plotLeft   = marginLeft;
@@ -404,21 +447,17 @@ async function drawChart(
     ctx.setLineDash([]);
   }
 
-  // ── Legend — fixed-width grid, rows centered ─────────────────────────────────
-  // Top of legend block sits just below x-axis title
-  const legendTopY = plotBottom + 50;
+  // ── Legend — per-column widths, rows centered ────────────────────────────────
+  const legendTopY = plotBottom + 38;
 
   grid.rows.forEach((row, rowIdx) => {
-    // Centre this row as a whole unit
-    const rowTotalW = row.length * grid.cellW - 28; // subtract trailing cellPadR
-    const startX    = (w - rowTotalW) / 2;
-    const rowY      = legendTopY + rowIdx * legendRowH + legendRowH / 2;
+    const startX = (w - grid.totalRowW) / 2;
+    const rowY   = legendTopY + rowIdx * legendRowH + legendRowH / 2;
 
     row.forEach((cell, colIdx) => {
       const item = legendItems[cell.index];
-      const lx   = startX + colIdx * grid.cellW;
+      const lx   = startX + grid.colOffsets[colIdx];
 
-      // Swatch line
       ctx.strokeStyle = item.color;
       ctx.lineWidth   = item.label === 'Median' ? 3 : 2;
       ctx.globalAlpha = item.alpha;
@@ -430,7 +469,6 @@ async function drawChart(
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
 
-      // Label
       ctx.fillStyle    = '#000000';
       ctx.font         = legendFont;
       ctx.textAlign    = 'left';
