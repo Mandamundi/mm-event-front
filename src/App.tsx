@@ -97,12 +97,12 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
 
   const handleUploadSuccess = (filename: string, data: any) => {
     const newAsset = {
-      ticker: data.ticker || `custom_${Date.now()}`,
+      ticker: data.ticker,  // use backend-assigned ticker, not custom_${Date.now()}
       label: `Custom: ${filename}`,
       category: 'Custom'
     };
     setCustomAssets([...customAssets, newAsset]);
-    setPrimaryTicker(newAsset.ticker);
+    setPrimaryTicker(data.ticker);
   };
 
   return (
