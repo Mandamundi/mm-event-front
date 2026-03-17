@@ -173,7 +173,7 @@ async function drawChart(
   ctx.scale(dpr, dpr);
 
   // ── Legend items ────────────────────────────────────────────────────────────
-  const legendFontSize = Math.max(11, Math.round(w / 85));
+  const legendFontSize = Math.max(11, Math.round(w / 70));
   const legendFont     = `600 ${legendFontSize}px ${FONT}`;
   const legendRowH     = legendFontSize + 16;
  
