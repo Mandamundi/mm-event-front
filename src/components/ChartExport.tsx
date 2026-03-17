@@ -48,7 +48,7 @@ const SIZES = [
   { label: '800 × 800  (1:1)',  w: 800,  h: 800  },
 ] as const;
 
-const FONT = '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+const FONT = 'Lato, -apple-system, system-ui, sans-serif';
 
 const EXPORT_PALETTE = [
   // ── Original 20 (saturated, kept as-is) ──────────────────────────────────
@@ -122,6 +122,10 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 // Mimics the MacroMicro style: fixed N-column grid, every cell equal width,
 // rows centered as a group.
 
+const SWATCH_W   = 24;
+const SWATCH_GAP = 7;
+const COL_PAD_R  = 24; // gap to the right of each cell
+ 
 function buildLegendGrid(
   items: Array<{ label: string }>,
   availableWidth: number,
@@ -130,24 +134,23 @@ function buildLegendGrid(
 ) {
   ctx.font = font;
   const maxLabelW = Math.max(...items.map(it => ctx.measureText(it.label).width));
-  const swatchW   = 24;
-  const swatchGap = 7;
-  const cellPadR  = 28;  // right-padding between cells
-  const cellW     = swatchW + swatchGap + maxLabelW + cellPadR;
-
-  // Pick column count: as many as fit without overflow
-  let cols = Math.max(1, Math.floor(availableWidth / cellW));
-  // Cap at 6 columns for readability
-  cols = Math.min(cols, 6);
-
+  const cellW     = SWATCH_W + SWATCH_GAP + maxLabelW + COL_PAD_R;
+ 
+  // Max columns that fit; cap at 6; don't exceed item count
+  let cols = Math.min(6, items.length, Math.max(1, Math.floor(availableWidth / cellW)));
+ 
+  // Avoid a lonely single item on the last row — reduce cols by 1 if so
+  if (cols > 1 && items.length % cols === 1) cols -= 1;
+ 
   const rows: Array<Array<{ label: string; index: number }>> = [];
   for (let i = 0; i < items.length; i += cols) {
-    rows.push(
-      items.slice(i, i + cols).map((it, j) => ({ label: it.label, index: i + j }))
-    );
+    rows.push(items.slice(i, i + cols).map((it, j) => ({ label: it.label, index: i + j })));
   }
-
-  return { rows, cellW, swatchW, swatchGap, cols };
+ 
+  // totalRowW is the pixel width of a full row (used to center each row)
+  const totalRowW = (row: typeof rows[0]) => row.length * cellW - COL_PAD_R;
+ 
+  return { rows, cellW, totalRowW, swatchW: SWATCH_W, swatchGap: SWATCH_GAP };
 }
 
 // ── Main draw ─────────────────────────────────────────────────────────────────
@@ -173,7 +176,7 @@ async function drawChart(
   const legendFontSize = Math.max(11, Math.round(w / 85));
   const legendFont     = `600 ${legendFontSize}px ${FONT}`;
   const legendRowH     = legendFontSize + 16;
-
+ 
   const legendItems: Array<{ label: string; color: string; dash: boolean; alpha: number }> = [];
   data.events.forEach((ev, i) => {
     if (!ev.window_data) return;
@@ -181,7 +184,7 @@ async function drawChart(
   });
   legendItems.push({ label: 'Median', color: '#111111', dash: false, alpha: 1 });
   legendItems.push({ label: 'Mean',   color: '#888888', dash: true,  alpha: 1 });
-
+ 
   const availW  = w - 48;
   const grid    = buildLegendGrid(legendItems, availW, ctx, legendFont);
   const legendH = grid.rows.length * legendRowH + 20;
@@ -303,7 +306,7 @@ async function drawChart(
   ctx.font         = `400 13px ${FONT}`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillText('Trading Days Relative to Event', plotLeft + plotW / 2, plotBottom + 30);
+  ctx.fillText('Trading Days Relative to Event', w / 2, plotBottom + 26);
 
   // ── y-axis title (rotated) ───────────────────────────────────────────────────
   // Positioned 16px from the left edge — well clear of the numbers
@@ -353,7 +356,7 @@ async function drawChart(
     const wmH    = watermarkImg.naturalHeight * scale;
     const wmX = plotLeft + ((plotW / 2) - wmW) / 2;
     const wmY = plotTop  + ((plotH / 2) - wmH) / 2;
-    ctx.globalAlpha = 0.30;  // 10% — very subtle, same as MacroMicro
+    ctx.globalAlpha = 0.20;  // 10% — very subtle, same as MacroMicro
     ctx.drawImage(watermarkImg, wmX, wmY, wmW, wmH);
     ctx.globalAlpha = 1;
   }
