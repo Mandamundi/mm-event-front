@@ -119,12 +119,8 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 // ── Grid-aligned legend layout ────────────────────────────────────────────────
-// Per-column widths: each column is exactly as wide as its widest label.
-// Tries the most columns that fit, down to 1.
-
-const SWATCH_W   = 24;
-const SWATCH_GAP = 7;
-const COL_PAD_R  = 28; // gap to the right of each column
+// Mimics the MacroMicro style: fixed N-column grid, every cell equal width,
+// rows centered as a group.
 
 function buildLegendGrid(
   items: Array<{ label: string }>,
@@ -133,42 +129,25 @@ function buildLegendGrid(
   font: string,
 ) {
   ctx.font = font;
-  const labelWidths = items.map(it => ctx.measureText(it.label).width);
+  const maxLabelW = Math.max(...items.map(it => ctx.measureText(it.label).width));
+  const swatchW   = 24;
+  const swatchGap = 7;
+  const cellPadR  = 28;  // right-padding between cells
+  const cellW     = swatchW + swatchGap + maxLabelW + cellPadR;
 
-  // Find the max cols where everything fits
-  let bestCols = 1;
-  for (let tryC = 6; tryC >= 1; tryC--) {
-    const colMaxW = Array.from({ length: tryC }, (_, c) =>
-      Math.max(0, ...items
-        .filter((_, i) => i % tryC === c)
-        .map((_, ri) => labelWidths[ri * tryC + c] ?? 0)
-      )
-    );
-    const totalW = colMaxW.reduce((s, cw) => s + SWATCH_W + SWATCH_GAP + cw + COL_PAD_R, 0) - COL_PAD_R;
-    if (totalW <= availableWidth) { bestCols = tryC; break; }
-  }
+  // Pick column count: as many as fit without overflow
+  let cols = Math.max(1, Math.floor(availableWidth / cellW));
+  // Cap at 6 columns for readability
+  cols = Math.min(cols, 6);
 
-  // Build rows
   const rows: Array<Array<{ label: string; index: number }>> = [];
-  for (let i = 0; i < items.length; i += bestCols) {
-    rows.push(items.slice(i, i + bestCols).map((it, j) => ({ label: it.label, index: i + j })));
+  for (let i = 0; i < items.length; i += cols) {
+    rows.push(
+      items.slice(i, i + cols).map((it, j) => ({ label: it.label, index: i + j }))
+    );
   }
 
-  // Per-column widths based on actual items assigned to each column
-  const colWidths = Array.from({ length: bestCols }, (_, c) =>
-    Math.max(0, ...rows.flatMap(row => {
-      const cell = row[c];
-      return cell ? [labelWidths[cell.index]] : [];
-    }))
-  );
-
-  // Cumulative x-offsets per column
-  const colOffsets: number[] = [];
-  let off = 0;
-  colWidths.forEach(cw => { colOffsets.push(off); off += SWATCH_W + SWATCH_GAP + cw + COL_PAD_R; });
-  const totalRowW = off - COL_PAD_R;
-
-  return { rows, colWidths, colOffsets, totalRowW, swatchW: SWATCH_W, swatchGap: SWATCH_GAP };
+  return { rows, cellW, swatchW, swatchGap, cols };
 }
 
 // ── Main draw ─────────────────────────────────────────────────────────────────
@@ -215,8 +194,8 @@ async function drawChart(
   // ── Plot margins ─────────────────────────────────────────────────────────────
   // Extra left margin so y-axis label has room without crowding numbers
   const marginTop    = titleBlockH + 14;
-  const marginBottom = legendH + 38;   // x-label + tick labels
-  const marginLeft   = 72;             // y-label (rotated) + numbers
+  const marginBottom = legendH + 50;   // 50px for x-label + tick labels + gap
+  const marginLeft   = 88;             // wider: room for rotated y-label + numbers
   const marginRight  = 24;
 
   const plotLeft   = marginLeft;
@@ -229,10 +208,6 @@ async function drawChart(
   // ── White background ─────────────────────────────────────────────────────────
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, w, h);
-
-  // Thin teal top accent bar
-  ctx.fillStyle = '#37BC9B';
-  ctx.fillRect(0, 0, w, 3);
 
   // ── Centered title ───────────────────────────────────────────────────────────
   const title = `${assetLabel} Performance Across ${eventTypeLabel}`;
@@ -376,9 +351,9 @@ async function drawChart(
     const scale  = Math.min(maxWmW / watermarkImg.naturalWidth, maxWmH / watermarkImg.naturalHeight);
     const wmW    = watermarkImg.naturalWidth  * scale;
     const wmH    = watermarkImg.naturalHeight * scale;
-    const wmX    = plotLeft + (plotW - wmW) / 2;
-    const wmY    = plotTop  + (plotH - wmH) / 2;
-    ctx.globalAlpha = 0.10;  // 10% — very subtle, same as MacroMicro
+    const wmX = plotLeft + ((plotW / 2) - wmW) / 2;
+    const wmY = plotTop  + ((plotH / 2) - wmH) / 2;
+    ctx.globalAlpha = 0.30;  // 10% — very subtle, same as MacroMicro
     ctx.drawImage(watermarkImg, wmX, wmY, wmW, wmH);
     ctx.globalAlpha = 1;
   }
@@ -447,17 +422,21 @@ async function drawChart(
     ctx.setLineDash([]);
   }
 
-  // ── Legend — per-column widths, rows centered ────────────────────────────────
-  const legendTopY = plotBottom + 38;
+  // ── Legend — fixed-width grid, rows centered ─────────────────────────────────
+  // Top of legend block sits just below x-axis title
+  const legendTopY = plotBottom + 50;
 
   grid.rows.forEach((row, rowIdx) => {
-    const startX = (w - grid.totalRowW) / 2;
-    const rowY   = legendTopY + rowIdx * legendRowH + legendRowH / 2;
+    // Centre this row as a whole unit
+    const rowTotalW = row.length * grid.cellW - 28; // subtract trailing cellPadR
+    const startX    = (w - rowTotalW) / 2;
+    const rowY      = legendTopY + rowIdx * legendRowH + legendRowH / 2;
 
     row.forEach((cell, colIdx) => {
       const item = legendItems[cell.index];
-      const lx   = startX + grid.colOffsets[colIdx];
+      const lx   = startX + colIdx * grid.cellW;
 
+      // Swatch line
       ctx.strokeStyle = item.color;
       ctx.lineWidth   = item.label === 'Median' ? 3 : 2;
       ctx.globalAlpha = item.alpha;
@@ -469,6 +448,7 @@ async function drawChart(
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
 
+      // Label
       ctx.fillStyle    = '#000000';
       ctx.font         = legendFont;
       ctx.textAlign    = 'left';
