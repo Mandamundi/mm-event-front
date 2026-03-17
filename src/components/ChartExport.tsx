@@ -175,7 +175,7 @@ async function drawChart(
   // ── Legend items ────────────────────────────────────────────────────────────
   const legendFontSize = Math.max(11, Math.round(w / 70));
   const legendFont     = `600 ${legendFontSize}px ${FONT}`;
-  const legendRowH     = legendFontSize + 16;
+  const legendRowH = legendFontSize + 10;
  
   const legendItems: Array<{ label: string; color: string; dash: boolean; alpha: number }> = [];
   data.events.forEach((ev, i) => {
@@ -185,7 +185,7 @@ async function drawChart(
   legendItems.push({ label: 'Median', color: '#111111', dash: false, alpha: 1 });
   legendItems.push({ label: 'Mean',   color: '#888888', dash: true,  alpha: 1 });
  
-  const availW  = w - 48;
+  const availW = w - 32;
   const grid    = buildLegendGrid(legendItems, availW, ctx, legendFont);
   const legendH = grid.rows.length * legendRowH + 20;
 
