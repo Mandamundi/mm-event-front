@@ -96,9 +96,10 @@ const { data: analysisData, isLoading: analysisLoading, error: analysisError } =
   const secondaryData = showExcess ? analysisData?.secondary_excess : analysisData?.secondary;
 
   const handleUploadSuccess = (filename: string, data: any) => {
+    const nameWithoutExtension = filename.replace(/\.[^/.]+$/, '');
     const newAsset = {
-      ticker: data.ticker,  // use backend-assigned ticker, not custom_${Date.now()}
-      label: `${filename}`,
+      ticker: data.ticker,
+      label: nameWithoutExtension,
       category: 'Custom'
     };
     setCustomAssets([...customAssets, newAsset]);
