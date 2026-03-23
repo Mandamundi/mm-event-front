@@ -587,7 +587,7 @@ export default function ChartExport({
             fontSize:'9px', color:'var(--muted)', fontStyle:'italic',
             marginTop:'6px', marginBottom:'10px', paddingLeft:'2px',
           }}>
-            White background · MacroMicro style
+            White background · Color coded
           </div>
 
           {!watermarkUrl && (
