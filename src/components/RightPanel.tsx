@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ThemeToggle from './ThemeToggle';
 import CSVUploadModal from './CSVUploadModal';
+import AssetSearch from './AssetSearch';
 
 export default function RightPanel({
   assets,
@@ -53,27 +54,20 @@ export default function RightPanel({
 
   return (
     <aside className="w-[240px] min-w-[240px] bg-[var(--surface2)] border-l border-[var(--navy-border)] flex flex-col overflow-y-auto">
+
+      {/* ── Primary Asset ─────────────────────────────────── */}
       <div className="p-3.5 px-4 border-b border-[var(--navy-border)]">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Primary Asset</div>
-        <div className="relative">
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] font-bold tracking-[0.08em] text-[var(--muted)] uppercase">A1</span>
-          <select 
-            className="w-full bg-[var(--navy-light)] border border-[var(--navy-border)] text-[var(--white)] font-sans text-xs py-[7px] pr-2.5 pl-9 rounded-[3px] cursor-pointer appearance-none"
-            value={primaryTicker}
-            onChange={(e) => setPrimaryTicker(e.target.value)}
-          >
-            {Object.entries(groupedAssets).map(([group, items]: any) => (
-              <optgroup key={group} label={group}>
-                {items.map((a: any) => (
-                  <option key={a.ticker} value={a.ticker}>{a.label} ({a.ticker})</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </div>
-        
+
+        <AssetSearch
+          assets={assets}
+          value={primaryTicker}
+          onChange={setPrimaryTicker}
+          badge="A1"
+        />
+
         {!secondaryTicker ? (
-          <button 
+          <button
             className="flex items-center gap-1.5 mt-2 text-[11px] text-[var(--accent)] cursor-pointer bg-transparent border-none font-sans p-0 tracking-[0.04em]"
             onClick={() => setSecondaryTicker(assets[0]?.ticker || '')}
           >
@@ -82,32 +76,27 @@ export default function RightPanel({
         ) : (
           <div className="mt-3">
             <div className="relative">
-              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] font-bold tracking-[0.08em] text-[var(--muted)] uppercase">A2</span>
-              <select 
-                className="w-full bg-[var(--navy-light)] border border-[var(--navy-border)] text-[var(--white)] font-sans text-xs py-[7px] pr-2.5 pl-9 rounded-[3px] cursor-pointer appearance-none"
+              <AssetSearch
+                assets={assets}
                 value={secondaryTicker}
-                onChange={(e) => setSecondaryTicker(e.target.value)}
-              >
-                {Object.entries(groupedAssets).map(([group, items]: any) => (
-                  <optgroup key={group} label={group}>
-                    {items.map((a: any) => (
-                      <option key={a.ticker} value={a.ticker}>{a.label} ({a.ticker})</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <button 
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-[var(--white)] bg-transparent border-none cursor-pointer"
-                onClick={() => setSecondaryTicker(null)}
+                onChange={setSecondaryTicker}
+                badge="A2"
+              />
+              {/* × sits outside AssetSearch so it doesn't interfere with the dropdown */}
+              <button
+                className="absolute right-2 top-[9px] text-[var(--muted)] hover:text-[var(--white)] bg-transparent border-none cursor-pointer z-20 leading-none"
+                onMouseDown={() => setSecondaryTicker(null)}
               >
                 ×
               </button>
             </div>
-            <div className="text-[9px] text-[var(--muted)] italic mt-[3px] pl-0.5">A second asset adds a second chart panel. Use × to remove it.</div>
+            <div className="text-[9px] text-[var(--muted)] italic mt-[3px] pl-0.5">
+              A second asset adds a second chart panel. Use × to remove it.
+            </div>
           </div>
         )}
 
-        <div 
+        <div
           className="text-[10px] text-[var(--muted)] cursor-pointer flex items-center gap-1 mt-2.5 tracking-[0.04em] transition-colors duration-150 hover:text-[var(--accent)]"
           onClick={() => setIsCSVModalOpen(true)}
         >
@@ -118,6 +107,7 @@ export default function RightPanel({
         </div>
       </div>
 
+      {/* ── Benchmark ─────────────────────────────────────── */}
       <div className="p-3.5 px-4 border-b border-[var(--navy-border)]">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Benchmark</div>
         <div className="flex items-center justify-between mb-2">
@@ -128,7 +118,7 @@ export default function RightPanel({
               className="cursor-help text-[var(--muted)] hover:text-[var(--accent)] transition-colors text-[10px]"
             >ⓘ</span>
           </span>
-          <div 
+          <div
             className={`w-8 h-[17px] rounded-[10px] relative cursor-pointer shrink-0 transition-colors duration-150 ${showExcess ? 'bg-[var(--accent)]' : 'bg-[var(--navy-border)]'}`}
             onClick={() => setShowExcess(!showExcess)}
           >
@@ -136,26 +126,19 @@ export default function RightPanel({
           </div>
         </div>
         <div className="text-[10px] text-[var(--muted)] italic">Toggle to compare vs a benchmark</div>
-        
+
         {showExcess && (
-          <div className="mt-2 relative">
-            <select 
-              className="w-full bg-[var(--navy-light)] border border-[var(--navy-border)] text-[var(--white)] font-sans text-xs py-[7px] px-2.5 rounded-[3px] cursor-pointer appearance-none"
+          <div className="mt-2">
+            <AssetSearch
+              assets={assets}
               value={benchmarkTicker || ''}
-              onChange={(e) => setBenchmarkTicker(e.target.value)}
-            >
-              {Object.entries(groupedAssets).map(([group, items]: any) => (
-                <optgroup key={group} label={group}>
-                  {items.map((a: any) => (
-                    <option key={a.ticker} value={a.ticker}>{a.label} ({a.ticker})</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+              onChange={setBenchmarkTicker}
+            />
           </div>
         )}
       </div>
 
+      {/* ── Analysis Window ───────────────────────────────── */}
       <div className="p-3.5 px-4 border-b border-[var(--navy-border)]">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Analysis Window</div>
         <div className="flex justify-between mb-1.5">
@@ -165,34 +148,34 @@ export default function RightPanel({
         </div>
         <div className="relative h-5 flex items-center">
           <div className="absolute w-full h-[3px] bg-[var(--navy-border)] rounded-[2px]"></div>
-          <div 
+          <div
             className="absolute h-[3px] bg-[var(--accent)] rounded-[2px]"
             style={{ left: `${50 - (localPreDays / 120) * 50}%`, right: `${50 - (localPostDays / 120) * 50}%` }}
           ></div>
-          <input 
-            type="range" 
-            min="1" max="120" 
-            value={localPreDays} 
+          <input
+            type="range"
+            min="1" max="120"
+            value={localPreDays}
             onChange={(e) => handleSliderChange(e, 'pre')}
             onMouseUp={handleSliderRelease}
             onTouchEnd={handleSliderRelease}
             className="absolute w-1/2 left-0 opacity-0 cursor-pointer"
             style={{ direction: 'rtl' }}
           />
-          <input 
-            type="range" 
-            min="1" max="120" 
-            value={localPostDays} 
+          <input
+            type="range"
+            min="1" max="120"
+            value={localPostDays}
             onChange={(e) => handleSliderChange(e, 'post')}
             onMouseUp={handleSliderRelease}
             onTouchEnd={handleSliderRelease}
             className="absolute w-1/2 right-0 opacity-0 cursor-pointer"
           />
-          <div 
+          <div
             className="absolute w-[13px] h-[13px] bg-[var(--accent)] rounded-full cursor-pointer border-2 border-[var(--navy)] pointer-events-none"
             style={{ left: `calc(${50 - (localPreDays / 120) * 50}% - 6px)` }}
           ></div>
-          <div 
+          <div
             className="absolute w-[13px] h-[13px] bg-[var(--accent)] rounded-full cursor-pointer border-2 border-[var(--navy)] pointer-events-none"
             style={{ right: `calc(${50 - (localPostDays / 120) * 50}% - 6px)` }}
           ></div>
@@ -200,6 +183,7 @@ export default function RightPanel({
         <div className="text-[9px] font-light text-[var(--muted)] italic mt-1.5 tracking-[0.04em]">All values in trading days</div>
       </div>
 
+      {/* ── Event Colors ──────────────────────────────────── */}
       <div className="p-3.5 px-4 flex-1">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Event Colors</div>
         <div className="flex flex-col gap-1 mt-1">
@@ -242,10 +226,10 @@ export default function RightPanel({
       </div>
 
       <ThemeToggle theme={theme} setTheme={setTheme} />
-      
+
       {isCSVModalOpen && (
-        <CSVUploadModal 
-          onClose={() => setIsCSVModalOpen(false)} 
+        <CSVUploadModal
+          onClose={() => setIsCSVModalOpen(false)}
           onUploadSuccess={(filename: string, data: any) => {
             if (onUploadSuccess) onUploadSuccess(filename, data);
             setIsCSVModalOpen(false);
@@ -255,4 +239,3 @@ export default function RightPanel({
     </aside>
   );
 }
-
