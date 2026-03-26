@@ -8,13 +8,14 @@ export default function Sidebar({
   phase,
   setPhase,
   selectedEventIds,
-  setSelectedEventIds
+  setSelectedEventIds,
+  onAddCustomEvents,
 }: any) {
   const selectedType = eventTypes.find((t: any) => t.id === selectedTypeId);
 
   const handleSelectAll = () => {
     if (!selectedType) return;
-    const validEvents = phase === 'end' 
+    const validEvents = phase === 'end'
       ? selectedType.events.filter((e: any) => e.end_date)
       : selectedType.events;
     setSelectedEventIds(validEvents.map((e: any) => e.id));
@@ -35,6 +36,8 @@ export default function Sidebar({
 
   return (
     <aside className="w-[260px] min-w-[260px] bg-[var(--surface2)] border-r border-[var(--navy-border)] flex flex-col overflow-hidden">
+
+      {/* Logo */}
       <div className="p-5 pb-4 border-b border-[var(--navy-border)] flex items-center gap-2.5">
         <svg className="w-7 h-7 shrink-0" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <line x1="2" y1="20" x2="26" y2="20" stroke="#1f3347" strokeWidth="1.5"/>
@@ -51,9 +54,10 @@ export default function Sidebar({
         </div>
       </div>
 
+      {/* Event type dropdown + phase toggle */}
       <div className="p-3.5 px-4 pb-2.5 border-b border-[var(--navy-border)]">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Event Type</div>
-        <select 
+        <select
           className="w-full bg-[var(--navy-light)] border border-[var(--navy-border)] text-[var(--white)] font-sans text-xs font-normal py-[7px] px-2.5 rounded-[3px] cursor-pointer appearance-none bg-no-repeat bg-right-2.5"
           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'6\'%3E%3Cpath d=\'M0 0l5 6 5-6z\' fill=\'%237a94a8\'/%3E%3C/svg%3E")', backgroundPosition: 'right 10px center' }}
           value={selectedTypeId || ''}
@@ -63,16 +67,16 @@ export default function Sidebar({
             <option key={t.id} value={t.id}>{t.label}</option>
           ))}
         </select>
-        
+
         {selectedType?.has_phases && (
           <div className="flex gap-0 mt-2 border border-[var(--navy-border)] rounded-[3px] overflow-hidden">
-            <button 
+            <button
               className={`flex-1 py-1.5 px-2 font-sans text-[11px] border-none cursor-pointer tracking-[0.04em] transition-all duration-150 ${phase === 'start' ? 'bg-[var(--accent)] text-[var(--navy)] font-bold' : 'bg-transparent text-[var(--muted)] font-normal'}`}
               onClick={() => setPhase('start')}
             >
               ▶ {selectedType.phase_labels?.start || 'Start'}
             </button>
-            <button 
+            <button
               className={`flex-1 py-1.5 px-2 font-sans text-[11px] border-none cursor-pointer tracking-[0.04em] transition-all duration-150 ${phase === 'end' ? 'bg-[var(--accent)] text-[var(--navy)] font-bold' : 'bg-transparent text-[var(--muted)] font-normal'}`}
               onClick={() => setPhase('end')}
             >
@@ -82,6 +86,7 @@ export default function Sidebar({
         )}
       </div>
 
+      {/* Event list — flex-1 so it fills remaining space above the button */}
       <div className="p-3.5 px-4 pb-2.5 flex-1 overflow-y-auto">
         <div className="text-[9px] font-bold tracking-[0.18em] uppercase text-[var(--muted)] mb-2">Filter Events</div>
         <div className="flex justify-between mb-1.5 px-0.5">
@@ -93,8 +98,10 @@ export default function Sidebar({
             const disabled = phase === 'end' && !e.end_date;
             const checked = selectedEventIds.includes(e.id);
             const dateStr = phase === 'start' ? e.start_date : (e.end_date || e.start_date);
-            const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-            
+            const formattedDate = dateStr
+              ? new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+              : '';
+
             let durationStr = '';
             if (e.start_date && e.end_date) {
               const diffTime = Math.abs(new Date(e.end_date).getTime() - new Date(e.start_date).getTime());
@@ -103,16 +110,16 @@ export default function Sidebar({
             }
 
             return (
-              <div 
-                key={e.id} 
+              <div
+                key={e.id}
                 className={`flex items-center gap-2 py-[5px] px-1.5 rounded-[3px] cursor-pointer transition-colors duration-100 ${checked ? 'bg-[var(--accent-dim)]' : 'hover:bg-[var(--navy-light)]'} ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                 onClick={() => toggleEvent(e.id, disabled)}
                 title={disabled ? 'No end date available' : e.notes}
               >
-                <input 
-                  type="checkbox" 
-                  checked={checked} 
-                  onChange={() => {}} 
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => {}}
                   className="w-3 h-3 shrink-0 accent-[var(--accent)]"
                   disabled={disabled}
                 />
@@ -130,6 +137,20 @@ export default function Sidebar({
           })}
         </div>
       </div>
+
+      {/* Add custom events button — pinned to bottom */}
+      <button
+        onClick={onAddCustomEvents}
+        className="flex items-center gap-1.5 px-4 py-2.5 w-full text-left font-sans text-[11px] tracking-[0.04em] text-[var(--accent)] bg-transparent border-none border-t border-[var(--navy-border)] cursor-pointer transition-opacity duration-150 hover:opacity-70 shrink-0"
+        style={{ borderTop: '1px solid var(--navy-border)' }}
+      >
+        <span
+          className="flex items-center justify-center text-[13px] leading-none rounded-[2px]"
+          style={{ width: '16px', height: '16px', background: 'rgba(112,197,228,0.15)' }}
+        >＋</span>
+        Add custom events
+      </button>
+
     </aside>
   );
 }
