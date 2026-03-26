@@ -96,7 +96,10 @@ export default function App() {
     pre_days: preDays,
     post_days: postDays,
     ...(showExcess && benchmarkTicker ? { benchmark_ticker: benchmarkTicker } : {}),
-    ...(secondaryTicker ? { second_ticker: secondaryTicker } : {})
+    ...(secondaryTicker ? { second_ticker: secondaryTicker } : {}),
+    ...(customEventTypes.length > 0 ? {
+      custom_events: customEventTypes.flatMap((t: any) => t.events)
+    } : {})
   } : null;
 
   const { data: analysisData, isLoading: analysisLoading, error: analysisError } = useAnalysis(analysisParams);
