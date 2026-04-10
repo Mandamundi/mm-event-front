@@ -9,7 +9,7 @@ export function useAssets() {
   useEffect(() => {
     async function fetchAssets() {
       try {
-        const res = await fetch(`https://mm-event-api.up.railway.app/api/assets`);
+        const res = await fetch(`https://mm-event-api.onrender.com/api/assets`);
         if (!res.ok) throw new Error('Failed to fetch assets');
         const data = await res.json();
         setAssets(data.assets || []);

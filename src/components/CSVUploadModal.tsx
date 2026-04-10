@@ -20,7 +20,7 @@ export default function CSVUploadModal({ onClose, onUploadSuccess }: any) {
     formData.append('file', file);
 
     try {
-      const res = await fetch(`https://mm-event-api.up.railway.app/api/validate-csv`, {
+      const res = await fetch(`https://mm-event-api.onrender.com/api/validate-csv`, {
         method: 'POST',
         body: formData,
       });

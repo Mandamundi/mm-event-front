@@ -8,7 +8,7 @@ export function useEvents() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const res = await fetch(`https://mm-event-api.up.railway.app/api/events`);
+        const res = await fetch(`https://mm-event-api.onrender.com/api/events`);
         if (!res.ok) throw new Error('Failed to fetch events');
         const data = await res.json();
         setEventTypes(data.event_types || []);
